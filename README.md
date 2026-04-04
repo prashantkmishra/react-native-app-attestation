@@ -14,11 +14,11 @@ npm install react-native-app-attestation
 
 
 ```js
-import { multiply } from 'react-native-app-attestation';
+import { attest } from 'react-native-app-attestation';
 
 // ...
 
-const result = multiply(3, 7);
+const result = attest(<nonce>);
 ```
 
 

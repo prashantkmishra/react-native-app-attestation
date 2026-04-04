@@ -1,7 +1,8 @@
 import { TurboModuleRegistry, type TurboModule } from 'react-native';
+import type { AttestationResult } from './types';
 
 export interface Spec extends TurboModule {
-  multiply(a: number, b: number): Promise<number>;
+  attest(nonce: string): Promise<AttestationResult>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('AppAttestation');

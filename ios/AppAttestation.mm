@@ -1,38 +1,52 @@
 #import "AppAttestation.h"
+#import "AppAttestation-Swift.h"
 
 @implementation AppAttestation
+RCT_EXPORT_MODULE()
 
-RCT_EXPORT_MODULE(AppAttestation)
-
-#pragma mark - Old Architecture (Bridge)
-
-RCT_EXPORT_METHOD(multiply:(double)a
-                  b:(double)b
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
-{
-    resolve(@(a * b));
+// Helper to handle the actual logic for both architectures
+- (void)runAttestation:(NSString *)nonce
+resolve:(RCTPromiseResolveBlock)resolve
+reject:(RCTPromiseRejectBlock)reject {
+  
+  // 1. Create the instance
+      AppAttestationImpl *swiftInstance = [[AppAttestationImpl alloc] init];
+      
+      // 2. Call the method.
+      // The first parameter has no label in Swift (_), so it's just 'attest:'
+      // The second parameter is 'completionHandler:'
+      [swiftInstance attest:nonce completionHandler:^(NSDictionary<NSString *,id> * _Nullable result, NSError * _Nullable error) {
+          if (error) {
+              reject([NSString stringWithFormat:@"%ld", (long)error.code],
+                     error.localizedDescription,
+                     error);
+          } else {
+              resolve(result);
+          }
+      }];
 }
 
-#pragma mark - New Architecture (TurboModule)
-
-#ifdef RCT_NEW_ARCH_ENABLED
-
-// This method MUST match Codegen spec (NO resolver/rejecter)
-- (void)multiply:(double)a
-               b:(double)b
-         resolve:(RCTPromiseResolveBlock)resolve
-          reject:(RCTPromiseRejectBlock)reject
+// --- OLD ARCHITECTURE BRIDGE ---
+RCT_REMAP_METHOD(attest,
+                 attestWithNonce:(NSString *)nonce
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
 {
-    resolve(@(a * b));
+  [self runAttestation:nonce resolve:resolve reject:reject];
+}
+
+
+// --- NEW ARCHITECTURE (TURBOMODULE) ---
+#ifdef RCT_NEW_ARCH_ENABLED
+- (void)attest:(NSString *)nonce resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+  [self runAttestation:nonce resolve:resolve reject:reject];
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
 (const facebook::react::ObjCTurboModule::InitParams &)params
 {
-    return std::make_shared<facebook::react::NativeAppAttestationSpecJSI>(params);
+  return std::make_shared<facebook::react::NativeAppAttestationSpecJSI>(params);
 }
-
 #endif
 
 @end

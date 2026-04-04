@@ -1,12 +1,19 @@
 import { Text, View, StyleSheet } from 'react-native';
-import { multiply } from 'react-native-app-attestation';
+import { attest } from 'react-native-app-attestation';
 
-const result = multiply(3, 8);
-
+const result = attest('SGlNeU5hbWVJc1Rlc3Rpbmc=');
+result
+  ?.then((attestResult) => {
+    console.log('attestResult token', attestResult.token);
+    console.log('attestResult keyId', attestResult.keyId);
+  })
+  .catch((exception) => {
+    console.log('exception:: ', exception);
+  });
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Text>Result: </Text>
     </View>
   );
 }

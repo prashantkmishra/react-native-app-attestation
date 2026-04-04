@@ -1,5 +1,6 @@
 import AppAttestation from './NativeAppAttestation';
+import type { AttestationResult } from './types';
 
-export function multiply(a: number, b: number): Promise<number> {
-  return AppAttestation.multiply(a, b);
+export async function attest(nonce: string): Promise<AttestationResult> {
+  return AppAttestation.attest(nonce);
 }

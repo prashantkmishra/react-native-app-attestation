@@ -1,6 +1,6 @@
 {
   "name": "react-native-app-attestation",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "React Native library for mobile app integrity and attestation using Android Play Integrity API and iOS App Attest.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",

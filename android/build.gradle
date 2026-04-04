@@ -26,20 +26,44 @@ buildscript {
   }
 }
 
+def isNewArchitectureEnabled() {
+  return rootProject.hasProperty("newArchEnabled") &&
+    rootProject.getProperty("newArchEnabled") == "true"
+}
 
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
+if (isNewArchitectureEnabled()) {
+  apply plugin: "com.facebook.react"
+}
 
-apply plugin: "com.facebook.react"
+static def supportsNamespace() {
+  def agpVersion = com.android.builder.model.Version.ANDROID_GRADLE_PLUGIN_VERSION
+  def parsed = agpVersion.tokenize('.')
+  def major = parsed[0].toInteger()
+  def minor = parsed[1].toInteger()
+
+  return (major == 7 && minor >= 3) || major >= 8
+}
 
 android {
-  namespace "com.appattestation"
+  if (supportsNamespace()) {
+    namespace "com.appattestation"
+    sourceSets {
+      main {
+        manifest.srcFile "src/main/AndroidManifestNew.xml"
+      }
+    }
+  }
 
   compileSdkVersion getExtOrDefault("compileSdkVersion")
 
   defaultConfig {
     minSdkVersion getExtOrDefault("minSdkVersion")
     targetSdkVersion getExtOrDefault("targetSdkVersion")
+    buildConfigField "boolean",
+      "IS_NEW_ARCHITECTURE_ENABLED",
+      isNewArchitectureEnabled().toString()
   }
 
   buildFeatures {
@@ -57,11 +81,31 @@ android {
   }
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
+    sourceCompatibility JavaVersion.VERSION_11
+    targetCompatibility JavaVersion.VERSION_11
+  }
+  sourceSets {
+    main {
+      java.srcDirs += isNewArchitectureEnabled()
+        ? ["src/newarch", "generated/java"]
+        : ["src/oldarch"]
+      jniLibs.srcDirs += ["generated/jni"]
+    }
   }
 }
 
+def kotlin_version = getExtOrDefault("kotlinVersion")
+
 dependencies {
   implementation "com.facebook.react:react-android"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
+
+if (isNewArchitectureEnabled()) {
+  react {
+    jsRootDir = file("../src/")
+    libraryName = "AppAttestation"
+    codegenJavaPackageName = "com.appattestation"
+  }
+}
+

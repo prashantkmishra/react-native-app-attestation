@@ -17,16 +17,18 @@ class AppAttestationModule(private val reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  override fun attest(nonce: String, promise: Promise) {
+  override fun attest(nonce: String, cloudProjectNumber: String?, promise: Promise) {
     try {
       val integrityManager = IntegrityManagerFactory.create(reactContext)
-      val cloudProjectNumber = 411060211933
-      val request = IntegrityTokenRequest.builder()
-        .setCloudProjectNumber(cloudProjectNumber)
+      val requestBuilder = IntegrityTokenRequest.builder()
         .setNonce(nonce)
-        .build()
-
-      integrityManager.requestIntegrityToken(request)
+      if (cloudProjectNumber != null) {
+        requestBuilder.setCloudProjectNumber(cloudProjectNumber.toLong())
+      } else {
+        promise.reject("INTEGRITY_ERROR", "Invalid cloudProjectNumber")
+        return
+      }
+      integrityManager.requestIntegrityToken(requestBuilder.build())
         .addOnSuccessListener { response ->
           val token = response.token()
           val map = Arguments.createMap()
@@ -34,10 +36,10 @@ class AppAttestationModule(private val reactContext: ReactApplicationContext) :
           map.putString("token", token)
           promise.resolve(map)
         }.addOnFailureListener {
-          promise.reject("PLAY_INTEGRITY_ERROR", it)
+          promise.reject("INTEGRITY_ERROR", it)
         }
     } catch (exception: Exception) {
-        promise.reject("PLAY_INTEGRITY_ERROR", exception.message)
+        promise.reject("INTEGRITY_ERROR", exception.message)
     }
 
   }

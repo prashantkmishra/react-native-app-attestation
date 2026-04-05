@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet } from 'react-native';
 import { attest } from 'react-native-app-attestation';
-
-const result = attest('SGlNeU5hbWVJc1Rlc3Rpbmc=');
+const cloudProjectNumber = '411060211933';
+const result = attest('SGlNeU5hbWVJc1Rlc3Rpbmc=', cloudProjectNumber);
 result
   ?.then((attestResult) => {
     console.log('attestResult token', attestResult.token);

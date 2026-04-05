@@ -79,8 +79,9 @@ public class AppAttestationImpl: NSObject {
         }
         
         continuation.resume(returning: [
+          "platform": "ios",
           "keyId": keyId,
-          "attestationObject": attestation.base64EncodedString()
+          "token": attestation.base64EncodedString()
         ])
       }
     }

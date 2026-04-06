@@ -43,7 +43,9 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "App attestation",
+    "App Integrity"
   ],
   "repository": {
     "type": "git",

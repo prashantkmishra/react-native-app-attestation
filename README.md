@@ -18,7 +18,9 @@ import { attest } from 'react-native-app-attestation';
 
 // ...
 
-const result = attest(<nonce>);
+nonce: min 16 characters Base 64 string
+cloudProjectNumber: Not required for iOS. Medatory fpr Android
+const result = attest(<nonce>, <cloudProjectNumber>);
 ```
 
 
